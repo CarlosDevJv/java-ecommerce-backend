@@ -1,11 +1,13 @@
 package com.projeto.Loom.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.projeto.Loom.dto.ProductDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.BeanUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -27,6 +29,8 @@ public class Product {
     @NotNull
     @NotBlank
     private String color;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<StockMovement> stockMovements;
 
     public Product() {
     }
@@ -38,8 +42,26 @@ public class Product {
         this.size = size;
         this.color = color;
     }
+    public Product(Long id, String name, Supplier supplier, Double price, String size, String color, List<StockMovement> stockMovements) {
+        this.id = id;
+        this.name = name;
+        this.supplier = supplier;
+        this.price = price;
+        this.size = size;
+        this.color = color;
+        this.stockMovements = stockMovements;
+    }
     public Product(ProductDto productDto){
         BeanUtils.copyProperties(productDto, this);
+    }
+
+    @JsonIgnore
+    public List<StockMovement> getStockMovements() {
+        return stockMovements;
+    }
+
+    public void setStockMovements(List<StockMovement> stockMovements) {
+        this.stockMovements = stockMovements;
     }
 
     public Long getId() {

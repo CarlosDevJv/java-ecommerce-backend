@@ -29,9 +29,21 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PostMapping(value = "/insertProduct")
+    public ResponseEntity<HttpStatus> insert(@RequestBody Product product){
+        productService.insert(product);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
     @PutMapping(value = "/replaceProduct")
     public ResponseEntity<HttpStatus> replace(@RequestBody ProductDto product){
         productService.update(2L, product);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping(value = "/delete/{id}")
+    public ResponseEntity<HttpStatus> deleteById(@PathVariable Long id){
+        productService.delete(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
