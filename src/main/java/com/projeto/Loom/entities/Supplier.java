@@ -4,10 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Objects;
 
+@Getter
+@Setter
 @Entity
 public class Supplier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +31,6 @@ public class Supplier {
     private List<Product> productList;
 
 
-
     public Supplier(Long id, String name, String CPNJ, String contact) {
         this.id = id;
         this.name = name;
@@ -36,38 +39,6 @@ public class Supplier {
     }
 
     public Supplier() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCPNJ() {
-        return CPNJ;
-    }
-
-    public void setCPNJ(String CPNJ) {
-        this.CPNJ = CPNJ;
-    }
-
-    public String getContact() {
-        return contact;
-    }
-
-    public void setContact(String contact) {
-        this.contact = contact;
     }
 
     @JsonIgnore

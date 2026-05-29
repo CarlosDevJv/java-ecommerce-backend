@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class    ProductService {
+public class ProductService {
     @Autowired
     private ProductRepository productRepository;
     @Autowired
