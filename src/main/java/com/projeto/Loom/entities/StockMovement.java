@@ -5,6 +5,7 @@ import com.projeto.Loom.entities.enums.MovementType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.BeanUtils;
@@ -23,8 +24,7 @@ public class StockMovement {
     @NotNull
     private String reason;
     @NotNull
-    private int quantity;
-    @NotNull
+    private Integer quantity;
     private LocalDateTime movementDate;
     @NotBlank
     @NotNull
@@ -33,7 +33,7 @@ public class StockMovement {
     @JoinColumn(name = "product")
     private Product product;
 
-    public StockMovement(Long id, MovementType movementType, String reason, int quantity, LocalDateTime movementDate, String createdBy, Product product) {
+    public StockMovement(Long id, MovementType movementType, String reason, Integer quantity, LocalDateTime movementDate, String createdBy, Product product) {
         this.id = id;
         this.movementType = movementType;
         this.reason = reason;

@@ -4,16 +4,16 @@ import com.projeto.Loom.dto.ProductDto;
 import com.projeto.Loom.entities.Product;
 import com.projeto.Loom.entities.StockMovement;
 import com.projeto.Loom.entities.enums.MovementType;
+import com.projeto.Loom.entities.enums.ProductStatus;
 import com.projeto.Loom.repository.ProductRepository;
 import com.projeto.Loom.repository.StockMovementRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,9 +22,11 @@ public class ProductService {
     private ProductRepository productRepository;
     @Autowired
     private StockMovementRepository stockMovementRepository;
+    @Autowired
+    private StockMovementService stockMovementService;
 
     public ProductDto findById(Long id){
-        Product product = productRepository.findById(id).get();
+        Product product = productRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
         return new ProductDto(product);
     }
 
@@ -35,46 +37,52 @@ public class ProductService {
                 .toList();
     }
 
-    public void insert(Product product){
-        StockMovement stockMovement = new StockMovement();
-        stockMovement.setProduct(product);
-        stockMovement.setQuantity(1);
-        stockMovement.setCreatedBy("Sistema_Automatico");
-        stockMovement.setMovementType(MovementType.ENTRY);
-        stockMovement.setReason("Renovando Estoque");
-        stockMovement.setMovementDate(LocalDateTime.now());
-        stockMovement.setProduct(product);
+    public void insert(ProductDto productDto){
+        Product product = new Product(productDto);
         productRepository.save(product);
-        stockMovementRepository.save(stockMovement);
-
+        stockMovementService.create(product);
     }
 
-    public void insertAll(List<Product> productList){
-        productRepository.saveAll(productList);
+    public void withdraw(ProductDto productDto){
+        if (productRepository.findById(productDto.getId()).isPresent()){
+            Product product = productRepository.getReferenceById(productDto.getId());
+
+            if (productDto.getQuantity() > product.getQuantity()){throw new IllegalArgumentException("Venda excede estoque");}
+            int newQuantity = product.getQuantity() - productDto.getQuantity();
+
+            product.setQuantity(productDto.getQuantity());
+            stockMovementService.withdraw(product);
+            productDto.setQuantity(newQuantity);
+            product.setQuantity(newQuantity);
+
+            update(productDto);
+        }
     }
 
     public void delete(Long id){
         productRepository.deleteById(id);
     }
 
-    public Product update(Long id, ProductDto productDto){
-        return productRepository.findById(id).map(productUpdate -> {
-            if(productDto.getName() != null && !productDto.getName().isBlank()){
-            productUpdate.setName(productDto.getName());
-        }
-        if (productDto.getColor() != null && !productDto.getColor().isBlank()) {
-            productUpdate.setColor(productDto.getColor());
-        }
-        if (productDto.getSize() != null && !productDto.getSize().isBlank()) {
-            productUpdate.setSize(productDto.getSize());
-        }
-        if (productDto.getPrice() != null && !productDto.getPrice().isNaN()) {
-            productUpdate.setPrice(productDto.getPrice());
-        }
-        if (productDto.getSupplier() != null) {
-            productUpdate.setSupplier(productDto.getSupplier());
-        }
-        return productRepository.save(productUpdate);}).orElseThrow(() -> new IllegalArgumentException("Houve um erro ao tentar atualizar o produto"));
-    }
 
+    public void update(ProductDto productDto){
+        Product product = new Product(productDto);
+        productRepository.findById(product.getId()).map(productUpdate -> {
+            if (product.getName() != null && !product.getName().isBlank()) {
+                productUpdate.setName(product.getName());
+            }
+            if (product.getPrice() != null && !product.getPrice().isNaN()) {
+                productUpdate.setPrice(product.getPrice());
+            }
+            if (product.getSupplier() != null) {
+                productUpdate.setSupplier(product.getSupplier());
+            }
+            if (product.getStatus() != null){
+                productUpdate.setStatus(product.getStatus());
+            }
+            if (product.getQuantity() != null){
+                productUpdate.setQuantity(product.getQuantity());
+            }
+            return productRepository.save(productUpdate);
+        }).orElseThrow(() -> new IllegalArgumentException("Houve um erro ao tentar atualizar o produto"));
+    }
 }

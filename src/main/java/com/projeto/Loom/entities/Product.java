@@ -2,9 +2,11 @@ package com.projeto.Loom.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.projeto.Loom.dto.ProductDto;
+import com.projeto.Loom.entities.enums.ProductStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.BeanUtils;
@@ -26,36 +28,34 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
+    @NotNull
     private Double price;
     @NotNull
-    @NotBlank
-    private String size;
-    @NotNull
-    @NotBlank
-    private String color;
     private Integer quantity;
+    @NotNull
+    private ProductStatus status;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<StockMovement> stockMovements;
 
     public Product() {
     }
-    public Product(Long id, String name, Supplier supplier, Double price, String size, String color) {
+    public Product(Long id, String name, Supplier supplier, Double price, Integer quantity, ProductStatus status) {
         this.id = id;
         this.name = name;
         this.supplier = supplier;
         this.price = price;
-        this.size = size;
-        this.color = color;
+        this.quantity = quantity;
+        this.status = status;
     }
 
-    public Product(Long id, String name, Supplier supplier, Double price, String size, String color, List<StockMovement> stockMovements, Integer quantity) {
+    public Product(Long id, String name, Supplier supplier, Double price, List<StockMovement> stockMovements, Integer quantity, ProductStatus status) {
         this.id = id;
         this.name = name;
         this.supplier = supplier;
         this.price = price;
-        this.size = size;
-        this.color = color;
         this.stockMovements = stockMovements;
+        this.quantity = quantity;
+        this.status = status;
     }
 
     public Product(ProductDto productDto){
